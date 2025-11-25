@@ -1,0 +1,263 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+
+enum Role {
+  OWNER
+  PENJAGA
+  MEMBER
+}
+
+enum MembershipStatus {
+  AKTIF
+  TIDAK
+}
+
+enum TransactionType {
+  PENDAPATAN
+  PENGELUARAN
+}
+
+enum EquipmentHealthStatus {
+  BAIK
+  BUTUH_PERAWATAN
+  RUSAK0
+}
+
+enum EquipmentHistoryType {
+  KERUSAKAN
+  PERBAIKAN
+}
+
+model SystemLog {
+  id          Int      @id @default(autoincrement())
+  user        User?    @relation(fields: [userId], references: [id])
+  userId      Int?     
+  ipAddress   String
+  device      String
+  action      String
+  method      String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+
+model User {
+  id     Int       @id @default(autoincrement())
+  name   String
+  username   String    @unique
+  email      String    @unique
+  password   String
+  profileImage String?
+  logins     SystemLog[]
+  role       Role @default(MEMBER)    
+
+  gymId Int?
+  gym   Gym?   @relation("GymStaff", fields: [gymId], references: [id]) 
+
+  gymsOwned   Gym[]            @relation("GymOwner")
+
+  memberships Membership[]
+  transactions Transaction[]
+  attendancesCreated Attendance[]
+  equipmentHistoriesReported EquipmentHistory[]
+  createdAt  DateTime  @default(now())
+  verifiedAt DateTime?
+  updatedAt  DateTime  @updatedAt
+}
+
+// OwnerProfile
+
+// MemberProfile
+
+// owner
+// crud
+model Gym {
+  id             Int       @id @default(autoincrement())
+  name           String
+  maxCapacity    Int?
+  address        String?
+  jamOperasional String?
+
+  ownerId Int?
+  owner   User?     @relation("GymOwner", fields: [ownerId], references: [id])
+
+  staff             User[]            @relation("GymStaff")
+  memberships       Membership[]
+  equipments        Equipment[]
+  transactions      Transaction[]
+  attendances       Attendance[]
+  tutorialVideos    TutorialVideo[]
+  equipmentHistories EquipmentHistory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// owner
+// crud
+model MembershipPackage {
+  id           Int       @id @default(autoincrement())
+  name         String
+  price        Decimal   @db.Decimal(12, 2)
+  durationDays Int     
+
+  memberships  Membership[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model Membership {
+  id        Int               @id @default(autoincrement())
+  userId    Int
+  gymId     Int
+  packageId Int
+
+  startDate DateTime
+  endDate   DateTime
+  status    MembershipStatus
+
+  user      User              @relation(fields: [userId], references: [id])
+  gym       Gym               @relation(fields: [gymId], references: [id])
+  package   MembershipPackage @relation(fields: [packageId], references: [id])
+
+  attendances Attendance[]
+  transactions Transaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([gymId])
+  @@index([packageId])
+}
+
+// user dan penjaga
+model Attendance {
+  id           Int       @id @default(autoincrement())
+  membershipId Int
+  gymId        Int
+  checkInAt    DateTime
+  checkOutAt   DateTime?
+  createdById  Int?      
+
+  membership Membership @relation(fields: [membershipId], references: [id])
+  gym        Gym        @relation(fields: [gymId], references: [id])
+  createdBy  User?      @relation(fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([membershipId])
+  @@index([gymId])
+  @@index([createdById])
+}
+
+// user
+model Transaction {
+  id           Int       @id @default(autoincrement())
+  gymId        Int
+  userId       Int?     
+  membershipId Int?      
+
+  date   DateTime
+  amount Decimal   @db.Decimal(12, 2)
+  type   TransactionType
+  note   String?
+
+  gym        Gym        @relation(fields: [gymId], references: [id])
+  user       User?      @relation(fields: [userId], references: [id])
+  membership Membership? @relation(fields: [membershipId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId])
+  @@index([userId])
+  @@index([membershipId])
+}
+
+// owner dan penjaga
+// crud
+model Equipment {
+  id           Int       @id @default(autoincrement())
+  gymId        Int
+  name         String
+  healthStatus EquipmentHealthStatus
+  photo        String?
+
+  gym            Gym               @relation(fields: [gymId], references: [id])
+  histories      EquipmentHistory[]
+  tutorialVideos TutorialVideo[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId])
+}
+
+// semua user kecuali admin
+// neglapor alat rusak, betulin alat
+// create dan update
+model EquipmentHistory {
+  id           Int                  @id @default(autoincrement())
+  equipmentId  Int
+  gymId        Int
+  date         DateTime
+  type         EquipmentHistoryType
+  description  String?
+  reportedById Int?                 // user yang melapor
+
+  equipment  Equipment @relation(fields: [equipmentId], references: [id])
+  gym        Gym       @relation(fields: [gymId], references: [id])
+  reportedBy User?     @relation(fields: [reportedById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([equipmentId])
+  @@index([gymId])
+  @@index([reportedById])
+}
+
+// owner dan penajaga
+// crud
+model TutorialVideo {
+  id          Int      @id @default(autoincrement())
+  gymId       Int?
+  equipmentId Int?
+  title       String
+  url         String
+  description String?
+
+  gym       Gym?       @relation(fields: [gymId], references: [id])
+  equipment Equipment? @relation(fields: [equipmentId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId])
+  @@index([equipmentId])
+}
+
+
+
+
