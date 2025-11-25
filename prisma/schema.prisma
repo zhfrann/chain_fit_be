@@ -21,6 +21,7 @@ enum Role {
   OWNER
   PENJAGA
   MEMBER
+  ADMIN
 }
 
 enum MembershipStatus {
@@ -36,7 +37,7 @@ enum TransactionType {
 enum EquipmentHealthStatus {
   BAIK
   BUTUH_PERAWATAN
-  RUSAK0
+  RUSAK
 }
 
 enum EquipmentHistoryType {
@@ -78,7 +79,7 @@ model User {
   attendancesCreated Attendance[]
   equipmentHistoriesReported EquipmentHistory[]
   createdAt  DateTime  @default(now())
-  verifiedAt DateTime?
+  isVerified Boolean? 
   updatedAt  DateTime  @updatedAt
 }
 
