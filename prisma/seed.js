@@ -3,7 +3,15 @@ import { hashPassword } from "../src/utils/passwordConfig.js";
 
 async function main() {
 console.log('🌱 Starting database seed...');
-
+  await prisma.user.create({
+    data: {
+      username: "admin123",
+      name: "admin",
+      password: await hashPassword("Admin123!"),
+      email: "admin@test.com",
+      role: "ADMIN"
+    }
+  })
 }
 
 main()

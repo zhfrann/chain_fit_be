@@ -70,7 +70,7 @@ model User {
   role       Role @default(MEMBER)    
 
   gymId Int?
-  gym   Gym?   @relation("GymStaff", fields: [gymId], references: [id]) 
+  gym   Gym?   @relation("GymStaff", fields: [gymId], references: [id], onDelete: SetNull) 
 
   gymsOwned   Gym[]            @relation("GymOwner")
 
@@ -79,13 +79,9 @@ model User {
   attendancesCreated Attendance[]
   equipmentHistoriesReported EquipmentHistory[]
   createdAt  DateTime  @default(now())
-  isVerified Boolean? 
   updatedAt  DateTime  @updatedAt
+
 }
-
-// OwnerProfile
-
-// MemberProfile
 
 // owner
 // crud
@@ -106,9 +102,24 @@ model Gym {
   attendances       Attendance[]
   tutorialVideos    TutorialVideo[]
   equipmentHistories EquipmentHistory[]
+  gymImage           GymImage[]
+  isVerified Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model GymImage {
+  id        Int      @id @default(autoincrement())
+  gymId     Int
+  url       String
+
+  gym       Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([gymId])
 }
 
 // owner
@@ -137,7 +148,7 @@ model Membership {
   status    MembershipStatus
 
   user      User              @relation(fields: [userId], references: [id])
-  gym       Gym               @relation(fields: [gymId], references: [id])
+  gym       Gym               @relation(fields: [gymId], references: [id], onDelete: Cascade)
   package   MembershipPackage @relation(fields: [packageId], references: [id])
 
   attendances Attendance[]
@@ -161,7 +172,7 @@ model Attendance {
   createdById  Int?      
 
   membership Membership @relation(fields: [membershipId], references: [id])
-  gym        Gym        @relation(fields: [gymId], references: [id])
+  gym        Gym        @relation(fields: [gymId], references: [id], onDelete: Cascade)
   createdBy  User?      @relation(fields: [createdById], references: [id])
 
   createdAt DateTime @default(now())
@@ -184,7 +195,7 @@ model Transaction {
   type   TransactionType
   note   String?
 
-  gym        Gym        @relation(fields: [gymId], references: [id])
+  gym        Gym        @relation(fields: [gymId], references: [id], onDelete: Cascade)
   user       User?      @relation(fields: [userId], references: [id])
   membership Membership? @relation(fields: [membershipId], references: [id])
 
@@ -205,7 +216,7 @@ model Equipment {
   healthStatus EquipmentHealthStatus
   photo        String?
 
-  gym            Gym               @relation(fields: [gymId], references: [id])
+  gym            Gym               @relation(fields: [gymId], references: [id], onDelete: Cascade)
   histories      EquipmentHistory[]
   tutorialVideos TutorialVideo[]
 
@@ -228,7 +239,7 @@ model EquipmentHistory {
   reportedById Int?                 // user yang melapor
 
   equipment  Equipment @relation(fields: [equipmentId], references: [id])
-  gym        Gym       @relation(fields: [gymId], references: [id])
+  gym        Gym       @relation(fields: [gymId], references: [id], onDelete: Cascade)
   reportedBy User?     @relation(fields: [reportedById], references: [id])
 
   createdAt DateTime @default(now())
@@ -249,7 +260,7 @@ model TutorialVideo {
   url         String
   description String?
 
-  gym       Gym?       @relation(fields: [gymId], references: [id])
+  gym       Gym?       @relation(fields: [gymId], references: [id], onDelete: Cascade)
   equipment Equipment? @relation(fields: [equipmentId], references: [id])
 
   createdAt DateTime @default(now())
