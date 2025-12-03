@@ -102,6 +102,7 @@ model Gym {
   attendances       Attendance[]
   tutorialVideos    TutorialVideo[]
   equipmentHistories EquipmentHistory[]
+  membershipPackages MembershipPackage[]
   gymImage           GymImage[]
   isVerified Boolean @default(false)
 
@@ -129,11 +130,15 @@ model MembershipPackage {
   name         String
   price        Decimal   @db.Decimal(12, 2)
   durationDays Int     
+  gymId Int
+  gym       Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
 
   memberships  Membership[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  @@index([gymId])
+  @@unique([gymId, name])
 }
 
 
