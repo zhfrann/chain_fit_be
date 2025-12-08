@@ -45,6 +45,14 @@ enum EquipmentHistoryType {
   PERBAIKAN
 }
 
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  EXPIRED
+  REFUNDED
+}
+
 model SystemLog {
   id          Int      @id @default(autoincrement())
   user        User?    @relation(fields: [userId], references: [id])
@@ -199,6 +207,11 @@ model Transaction {
   amount Decimal   @db.Decimal(12, 2)
   type   TransactionType
   note   String?
+
+  status PaymentStatus @default(PENDING)
+  paymentMethod String?
+  orderId      String?    @unique
+
 
   gym        Gym        @relation(fields: [gymId], references: [id], onDelete: Cascade)
   user       User?      @relation(fields: [userId], references: [id])
