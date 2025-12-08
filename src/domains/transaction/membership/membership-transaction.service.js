@@ -79,12 +79,6 @@ class MembershipTransactionService {
           name: user.name,
           email: user.email,
         },
-        // enabled_payments: [
-        //   'bank_transfer', // VA
-        //   'gopay',
-        //   'shopeepay',
-        //   // 'other_qris', // jangan di-include kalau nggak mau QRIS
-        // ],
         item_details: [
           {
             id: membershipPackage.id.toString(),
@@ -199,6 +193,8 @@ class MembershipTransactionService {
       }
 
       // Update Transaction (status + paymentMethod)
+      console.log("update status transaction");
+      
       const updatedTx = await tx.transaction.update({
         where: { id: transaction.id },
         data: {
@@ -279,7 +275,7 @@ class MembershipTransactionService {
             return true;
         }
 
-        if (data.metadata.type == 'subscription'){
+        if (data.metadata.type == 'membership'){
             return await this.updateTransactionStatus(data);
         }
         
