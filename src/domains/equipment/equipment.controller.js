@@ -4,18 +4,18 @@ import { createdResponse, successResponse } from "../../utils/response.js";
 class EquipmentController {
   
   async create(req, res) {
-    const result = await equipmentService.create(req.user.id, req.body);
+    const result = await equipmentService.create(req.user, req.body);
     return createdResponse(res, result);
   }
 
   async findAll(req, res) {
-    const result = await equipmentService.findAll(req.user.id, req.query);
+    const result = await equipmentService.findAll(req.user, req.query);
     return successResponse(res, result);
   }
 
   async findOne(req, res) {
     const { id } = req.params;
-    const result = await equipmentService.findOne(req.user.id, id);
+    const result = await equipmentService.findOne(req.user, id);
     return successResponse(res, result);
   }
 

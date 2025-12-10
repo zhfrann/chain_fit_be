@@ -18,7 +18,7 @@ class EquipmentRoutes extends BaseRoutes {
     // 2. Get All Equipment (Pagination)
     this.router.get("/",
       authTokenMiddleware.authenticate,
-      authTokenMiddleware.authorizeUser(['OWNER' || 'PENJAGA']),
+      authTokenMiddleware.authorizeUser(['OWNER' , 'MEMBER', 'PENJAGA']),
       validateCredentials(queryEquipment),
       tryCatch(equipmentController.findAll)
     );
@@ -26,7 +26,7 @@ class EquipmentRoutes extends BaseRoutes {
     // 3. Get One Equipment
     this.router.get("/:id",
       authTokenMiddleware.authenticate,
-      authTokenMiddleware.authorizeUser(['OWNER']),
+      authTokenMiddleware.authorizeUser(['OWNER', 'MEMBER', 'PENJAGA']),
       tryCatch(equipmentController.findOne)
     );
 

@@ -10,6 +10,10 @@ const createEquipment = Joi.object({
   }),
   photo: Joi.string().uri().allow(null, '').optional().messages({
     'string.uri': 'Format URL foto tidak valid'
+  }),
+  gymId: Joi.number().integer().positive().optional(),
+  applyToAll: Joi.boolean().default(false).messages({
+      'boolean.base': 'applyToAll harus berupa boolean'
   })
 });
 

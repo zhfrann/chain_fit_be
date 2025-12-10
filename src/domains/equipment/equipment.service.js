@@ -6,6 +6,42 @@ class EquipmentService {
    * Helper untuk mendapatkan Gym milik owner.
    * Jika owner belum punya gym, throw error.
    */
+  async _getAuthorizedGymIds(user) {
+    if (user.role === 'OWNER' || user.role === 'PENJAGA') {
+      const gyms = await prisma.gym.findMany({
+        where: { ownerId: user.id },
+        select: { id: true }
+      });
+      
+      if (gyms.length === 0) {
+        throw BaseError.notFound('Anda tidak memiliki gym');
+      }
+
+      return gyms.map(g => g.id);
+    }
+    
+    else if (user.role === 'MEMBER') {
+      const memberships = await prisma.membership.findMany({
+        where: {
+          userId: user.id,
+          status: 'AKTIF',
+          endDate: { gte: new Date() }
+        },
+        select: { gymId: true }
+      });
+
+      if (memberships.length === 0) {
+        throw BaseError.notFound('Anda tidak memiliki membership aktif di gym manapun');
+      }
+
+      return memberships.map(m => m.gymId);
+    }
+    
+    else {
+      throw BaseError.forbidden('Role tidak diizinkan');
+    }
+  }
+
   async _getOwnerGym(ownerId) {
     const gym = await prisma.gym.findFirst({
       where: { ownerId: ownerId },
@@ -19,13 +55,38 @@ class EquipmentService {
   }
 
   // 1. Create Equipment
-  async create(ownerId, data) {
-    // Pastikan equipment dibuat di gym milik owner tersebut
-    const gym = await this._getOwnerGym(ownerId);
+  async create(user, data) {
+    // Ambil semua gym yang dimiliki user
+    const authorizedGymIds = await this._getAuthorizedGymIds(user);
 
+    // Jika applyToAll = true → buat di semua gym
+    if (data.applyToAll) {
+      const createData = authorizedGymIds.map(gymId => ({
+        gymId,
+        name: data.name,
+        healthStatus: data.healthStatus,
+        photo: data.photo
+      }));
+
+      return await prisma.equipment.createMany({
+        data: createData
+      });
+    }
+
+    if (!data.gymId) {
+      throw BaseError.badRequest("gymId harus diisi jika applyToAll = false");
+    }
+
+    const targetGymId = parseInt(data.gymId);
+
+    if (!authorizedGymIds.includes(targetGymId)) {
+      throw BaseError.forbidden("Anda tidak memiliki akses ke gym ini");
+    }
+
+    // Create equipment untuk gym tertentu
     return await prisma.equipment.create({
       data: {
-        gymId: gym.id,
+        gymId: targetGymId,
         name: data.name,
         healthStatus: data.healthStatus,
         photo: data.photo
@@ -33,16 +94,18 @@ class EquipmentService {
     });
   }
 
+
   // 2. Get All Equipment (Pagination + Search + Security Check)
-  async findAll(ownerId, query) {
-    const { page = 1, limit = 10, search } = query;
+  async findAll(user, query) {
+    const { page = 1, limit = 10, search, gymId} = query;
     const skip = (page - 1) * limit;
 
-    const gym = await this._getOwnerGym(ownerId);
+    const authorizedGymIds = await this._getAuthorizedGymIds(user);
 
     // Filter kondisi: Milik gym owner INI dan opsional search nama
     const whereCondition = {
-      gymId: gym.id,
+      gymId: { in: authorizedGymIds },
+      ...(gymId && { gymId: parseInt(gymId) }),
       ...(search && {
         name: { contains: search}
       })
@@ -77,18 +140,21 @@ class EquipmentService {
   }
 
   // 3. Get One Equipment Detail
-  async findOne(ownerId, equipmentId) {
+  async findOne(user, equipmentId) {
+    const authorizedGymIds = await this._getAuthorizedGymIds(user);
+    
     const equipment = await prisma.equipment.findFirst({
       where: {
         id: parseInt(equipmentId),
-        gym: {
-          ownerId: ownerId // SECURITY: Hanya bisa lihat jika gym-nya milik owner ini
-        }
+        gymId: { in: authorizedGymIds }
       },
       include: {
         histories: {
           take: 5, // Tampilkan 5 history terakhir (opsional)
           orderBy: { createdAt: 'desc' }
+        },
+        gym: {
+          select: { name: true }
         }
       }
     });
