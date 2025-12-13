@@ -34,7 +34,7 @@ class GymMembershipService {
                         id: true,
                         name: true,
                         price: true,
-                        durationInDays: true,
+                        durationDays: true
                     }
                 }
             }
