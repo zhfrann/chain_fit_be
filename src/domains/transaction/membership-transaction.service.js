@@ -1,9 +1,15 @@
 import BaseError from "../../base_classes/base-error.js";
 import prisma from "../../config/db.js";
 import { snap} from "../../config/midtrans.js";
-import crypto from "crypto";
+import crypto, { randomUUID } from "crypto";
 
 class MembershipTransactionService {
+  
+  async generateOrderId(gymId, transactionId) {
+    const rand = randomUUID().replace(/-/g, "").slice(0, 10);
+    return `GYM-${gymId}-${transactionId}-${rand}`;
+  }
+
   async createSnap(packageId, userId, gymId) {
     return prisma.$transaction(async (tx) => {
       // Cek package + gym
@@ -64,7 +70,7 @@ class MembershipTransactionService {
       });
 
       // Generate orderId (wajib unik untuk Midtrans)
-      const orderId = `GYM-${gymId}-${transaction.id}`; 
+      const orderId = await this.generateOrderId(gymId, transaction.id); 
 
       // Susun parameter Snap
       const parameter = {
