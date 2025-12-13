@@ -6,7 +6,7 @@ import { changePasswordSchema } from "../auth/auth-schema.js";
 
 // GYM DOMAIN
 import gymController from "./gym.controller.js";
-import { createGymSchema, getGymSchema, gymSchema, queryGymSchema } from "./gym.schema.js";
+import { createGymSchema, getGymSchema, gymSchema, queryGymSchema, updateGymSchema } from "./gym.schema.js";
 
 // PAKET MEMBER DOMAIN
 import {
@@ -39,6 +39,13 @@ class GymRoutes extends BaseRoutes {
       tryCatch(gymMembershipController.getMembership),
     ]);
 
+    // profile penjaga
+    this.router.get("/gym-staff/me", [
+      authTokenMiddleware.authenticate,
+      authTokenMiddleware.authorizeUser(["PENJAGA"]),
+      tryCatch(gymPenjagaController.profile),
+    ]);
+
     // ========== Verified gym (ADMIN) ==========
     this.router.get("/verified-gym", [
       authTokenMiddleware.authenticate,
@@ -69,13 +76,7 @@ class GymRoutes extends BaseRoutes {
       tryCatch(gymPenjagaController.createPenjaga),
     ]);
 
-    this.router.delete("/:id/gym-staff", [
-      authTokenMiddleware.authenticate,
-      authTokenMiddleware.authorizeUser(["OWNER"]),
-      validateCredentials(gymSchema, "params"),
-      validateCredentials(getPenjagaSchema),
-      tryCatch(gymPenjagaController.deletePenjaga),
-    ]);
+
 
     this.router.get("/:id/gym-staff", [
       authTokenMiddleware.authenticate,
@@ -84,18 +85,18 @@ class GymRoutes extends BaseRoutes {
       tryCatch(gymPenjagaController.index),
     ]);
 
-    this.router.get("/:id/gym-staff/profile", [
-      authTokenMiddleware.authenticate,
-      authTokenMiddleware.authorizeUser(["PENJAGA"]),
-      validateCredentials(gymSchema, "params"),
-      tryCatch(gymPenjagaController.profile),
-    ]);
-
     this.router.get("/:id/gym-staff/:userId", [
       authTokenMiddleware.authenticate,
       authTokenMiddleware.authorizeUser(["OWNER"]),
       validateCredentials(getPenjagaSchema, "params"),
       tryCatch(gymPenjagaController.show),
+    ]);
+
+    this.router.delete("/:id/gym-staff/:userId", [
+      authTokenMiddleware.authenticate,
+      authTokenMiddleware.authorizeUser(["OWNER"]),
+      validateCredentials(getPenjagaSchema, "params"),
+      tryCatch(gymPenjagaController.deletePenjaga),
     ]);
 
     this.router.put("/:id/gym-staff/:userId", [
@@ -188,6 +189,13 @@ class GymRoutes extends BaseRoutes {
       validateCredentials(createGymSchema),
       tryCatch(gymController.create),
     ]);
+    this.router.put("/:id", [
+      authTokenMiddleware.authenticate,
+      authTokenMiddleware.authorizeUser(["OWNER"]),
+      validateCredentials(gymSchema, "params"),
+      validateCredentials(updateGymSchema),
+      tryCatch(gymController.update)
+    ])
 
     this.router.get("/", [
       authTokenMiddleware.authenticate,

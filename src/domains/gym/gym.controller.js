@@ -4,22 +4,35 @@ import gymService from "./gym.service.js";
 class GymController {
 
     async create(req, res){
-        const {namaGym, maxCapacity, address} = req.body;
-        const maxCap = parseInt(maxCapacity, 10);
+        const {namaGym, maxCapacity, address, jamOperasional, lat, long} = req.body;
+        const maxCp = Number(maxCapacity);
+        const latitude = Number(lat);
+        const longitude = Number(long);
         const ownerId = req.user.id;
         const img = req.files.image;
-        console.log(img);
         
 
-        const gym = await gymService.createGym({namaGym, maxCap, address, ownerId}, img)
+        const gym = await gymService.createGym({namaGym, maxCp, address, ownerId, jamOperasional, latitude, longitude}, img)
 
         if(!gym) throw new Error("Failed to create gym");
 
-        return successResponse(res, gym);
+        return createdResponse(res, gym);
     }
 
     async update(req, res){
+            let maxCp, latitude, longitude;
+            const {name, maxCapacity, address, jamOperasional, lat, long} = req.body;
+            if(maxCapacity) maxCp = Number(maxCapacity);
+            if(lat) latitude = Number(lat);
+            if(long) longitude = Number(long);
+            const ownerId = req.user.id;
+            const id = Number(req.params.id);
 
+            const gym = await gymService.updateGym({name, maxCapacity, address, jamOperasional, latitude, longitude}, ownerId, id);
+
+            if(!gym) throw new Error("Failed to update gym");
+
+            return successResponse(res, gym);
     }
     
     async delete(req, res){
