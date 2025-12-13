@@ -96,9 +96,11 @@ model User {
 model Gym {
   id             Int       @id @default(autoincrement())
   name           String
-  maxCapacity    Int?
-  address        String?
-  jamOperasional String?
+  maxCapacity    Int
+  latitude       Decimal
+  longitude       Decimal
+  address        String
+  jamOperasional String
 
   ownerId Int?
   owner   User?     @relation("GymOwner", fields: [ownerId], references: [id])
