@@ -72,7 +72,7 @@ class EquipmentController {
     async getEquipmentUser(req, res){
         const userId = req.user.id;
         const search = req.query.search;
-        const filter = req.query.filter;
+        const filter = Number(req.query.filter);
         const equipment = await equipmentService.searchEquipmentsForMember(search, filter, userId);
         return successResponse(res, equipment);
     }

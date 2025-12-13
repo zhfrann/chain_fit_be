@@ -197,7 +197,7 @@ class EquipmentService {
         },
       });
     }
-    return prisma.equipment.updateMany({
+    const eq= await prisma.equipment.update({
       where: {
         id: equipmentId,
         gymId,
@@ -206,6 +206,7 @@ class EquipmentService {
         ...updateData,
       },
     });
+    return eq;
   }
 
   async deleteEquipment(equipmentId, gymId, userId) {
@@ -324,7 +325,7 @@ class EquipmentService {
     if (filter) {
       equipmentWhere.gymId = filter;
     }
-    return prisma.equipment.findMany({
+    const searchEq =  prisma.equipment.findMany({
       where: {
         ...equipmentWhere,
         gym: {
@@ -336,6 +337,8 @@ class EquipmentService {
         },
       },
     });
+    if(!searchEq) throw BaseError.notFound("Equipment not found");
+    return searchEq
   }
 }
 

@@ -44,7 +44,7 @@ const showEquipmentSchema = Joi.object({
     search: Joi.string().optional().messages({
         "string.base": "Search must be a string."
     }),
-    healthStatus: Joi.string().valid('BAIK', 'BUTUH_PERAWATAN', 'RUSAK').required().messages({
+    healthStatus: Joi.string().valid('BAIK', 'BUTUH_PERAWATAN', 'RUSAK').optional().messages({
         "any.only": "Health status must be one of 'BAIK', 'BUTUH_PERAWATAN', or 'RUSAK'.",
         "string.base": "Health status must be a string."
     })
@@ -87,11 +87,14 @@ const getUserEquipmentSchema = Joi.object({
     search: Joi.string().optional().messages({
         "string.base": "Search must be a string."
     }),
-    filter: Joi.string().valid('BAIK', 'BUTUH_PERAWATAN', 'RUSAK').optional().messages({
-        "any.only": "Filter must be one of 'BAIK', 'BUTUH_PERAWATAN', or 'RUSAK'.",
-        "string.base": "Filter must be a string."
-    })
+    filter: Joi.number().min(1).required().messages({
+        "number.empty": "Id equipment is required",
+        "number.min": "Id equipment must be number at least 1",
+        "number.base": "Id equipment must be int"
+    }),
 });
+
+
 
 export {
     equipmentSchema,
