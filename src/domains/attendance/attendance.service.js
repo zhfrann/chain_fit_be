@@ -138,6 +138,7 @@ class AttendanceService {
         const attendance = await prisma.attendance.findMany({
             where: {
                 gymId: gymId,
+                
             },
         });
         return attendance;
