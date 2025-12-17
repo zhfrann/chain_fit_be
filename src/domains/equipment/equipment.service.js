@@ -135,6 +135,8 @@ class EquipmentService {
   }
 
   async updateEquipment(equipmentId, gymId, userId, updateData, imageUrl) {
+    console.log(updateData);
+    
     const user = await prisma.user.findUnique({
       where: { id: userId },
     });
