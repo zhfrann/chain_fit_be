@@ -114,6 +114,8 @@ class GymService {
                 address: true,
                 jamOperasional: true,
                 tag: true,
+                latitude: true,
+                longitude: true,
                 facility: true,
                 gymImage: {
                     select: {
