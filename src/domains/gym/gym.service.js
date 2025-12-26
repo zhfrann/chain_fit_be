@@ -108,6 +108,7 @@ class GymService {
                 verified: "APPROVED"
             },
             select: {
+                id: true,
                 name: true,
                 maxCapacity: true,
                 id: true,
