@@ -119,6 +119,7 @@ class GymService {
                 latitude: true,
                 longitude: true,
                 facility: true,
+                description: true,
                 gymImage: {
                     select: {
                         id: true,
