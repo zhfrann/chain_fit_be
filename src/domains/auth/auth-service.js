@@ -150,7 +150,7 @@ class AuthService {
         const u = await prisma.user.findUnique({
         where: { id: id },
         select: {
-            id: true, username: true, email: true, role: true, profileImage: true,
+            id: true, username: true, email: true, role: true, profileImage: true, name: true,
             gym: { select: { id: true, name: true } },          // untuk staff
             gymsOwned: { select: { id: true, name: true } },    // untuk owner
             memberships: {                                      // opsional untuk member
@@ -167,7 +167,7 @@ class AuthService {
 
         const defaultGymId = gyms[0]?.id ?? null;
 
-        return { user: { id:u.id, username:u.username, email:u.email, role:u.role, profileImage:u.profileImage }, gyms, defaultGymId };
+        return { user: { id:u.id, username:u.username, email:u.email, role:u.role, profileImage:u.profileImage, name: u.name }, gyms, defaultGymId };
     }
 
     async updateProfile(id, data, imgProfile) {
