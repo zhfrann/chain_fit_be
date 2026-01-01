@@ -220,14 +220,34 @@ class GymMembershipService {
     }
 
 
-    async getAllUserMembership(gymId){
-        const member = await prisma.membership.findMany({
-            where: {
-                gymId: gymId
-            }
-        })
+    async getAllUserMembership(gymId) {
+        const members = await prisma.membership.findMany({
+            where: { gymId },
+            select: {
+            id: true,
+            status: true,
+            endDate: true,
+            user: { select: { name: true, email: true } },
+            },
+            orderBy: { endDate: "desc" },
+        });
 
-        return member;
+        const now = Date.now();
+        const dayMs = 24 * 60 * 60 * 1000;
+
+        return members.map((m) => {
+            const isActive = m.status === "AKTIF" && m.endDate.getTime() >= now;
+            const masaAktifHari = isActive
+            ? Math.max(0, Math.ceil((m.endDate.getTime() - now) / dayMs))
+            : 0;
+
+            return {
+            id: m.id,
+            status: m.status,
+            masaAktifHari,
+            user: m.user,
+            };
+        });
     }
 
     async getUserMembershipById(gymId, membershipId){
