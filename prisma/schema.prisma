@@ -40,6 +40,11 @@ enum EquipmentHealthStatus {
   RUSAK
 }
 
+enum CashflowType {
+  CASH
+  CASHLESS
+}
+
 enum EquipmentHistoryType {
   KERUSAKAN
   PERBAIKAN
@@ -281,6 +286,15 @@ model EquipmentHistory {
   @@index([equipmentId])
   @@index([gymId])
   @@index([reportedById])
+}
+
+// cashflow
+
+model GymCashflow {
+  id    Int       @id @default(autoincrement())
+  name String     
+  jumlah Decimal  @db.Decimal(12, 2)
+  type CashflowType   
 }
 
 // owner dan penajaga
