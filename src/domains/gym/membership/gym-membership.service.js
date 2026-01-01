@@ -242,10 +242,10 @@ class GymMembershipService {
             : 0;
 
             return {
-            id: m.id,
-            status: m.status,
-            masaAktifHari,
-            user: m.user,
+                id: m.id,
+                status: m.status,
+                masaAktifHari,
+                user: m.user,
             };
         });
     }
