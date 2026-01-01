@@ -349,6 +349,8 @@ class GymService {
             return penjaga
     }
 
+    // perpanjang member manual
+
 }
 
 export default new GymService();

@@ -28,6 +28,7 @@ import {
 import { createEquipmentSchema, deleteEquipmentSchema,  getHistoryEquipmentByIdSchema, showEquipmentSchema, updateEquipmentSchema } from "../equipment/equipment.schema.js";
 import equipmentController from "../equipment/equipment.controller.js";
 import gymMembershipController from "./membership/gym-membership.controller.js";
+import { createMebershipSchema, deleteMembershipSchema, getMembershipSchema, updateMembershipSchema } from "./membership/gym-membership.schema.js";
 
 class GymRoutes extends BaseRoutes {
   routes() {
@@ -38,6 +39,43 @@ class GymRoutes extends BaseRoutes {
       authTokenMiddleware.authorizeUser(["MEMBER"]),
       tryCatch(gymMembershipController.getMembership),
     ]);
+
+    this.router.get("/:id/memberships", [
+      authTokenMiddleware.authenticate,
+      authTokenMiddleware.authorizeUser(["PENJAGA", "OWNER"]),
+      validateCredentials(gymSchema, "params"),
+      tryCatch(gymMembershipController.index)
+    ])
+    
+    this.router.get("/:id/memberships/:membershipId", [
+      authTokenMiddleware.authenticate,
+      authTokenMiddleware.authorizeUser(["PENJAGA", "OWNER"]),
+      validateCredentials(getMembershipSchema, "params"),
+      tryCatch(gymMembershipController.show)
+    ])
+
+    this.router.post("/:id/memberships", [
+      authTokenMiddleware.authenticate,
+      authTokenMiddleware.authorizeUser(["PENJAGA", "OWNER"]),
+      validateCredentials(createMebershipSchema),
+      validateCredentials(gymSchema, "params"),
+      tryCatch(gymMembershipController.create)
+    ]);
+
+    this.router.put("/:id/memberships/:membershipId", [
+      authTokenMiddleware.authenticate,
+      authTokenMiddleware.authorizeUser(["PENJAGA", "OWNER"]),
+      validateCredentials(updateMembershipSchema),
+      validateCredentials(deleteMembershipSchema, "params"),
+      tryCatch(gymMembershipController.update)
+    ])
+
+    this.router.delete("/:id/memberships/:membershipId", [
+      authTokenMiddleware.authenticate,
+      authTokenMiddleware.authorizeUser(["PENJAGA", "OWNER"]),
+      validateCredentials(deleteMembershipSchema, "params"),
+      tryCatch(gymMembershipController.delete)
+    ])
 
     // profile penjaga
     this.router.get("/gym-staff/me", [
