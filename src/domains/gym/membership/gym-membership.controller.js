@@ -11,23 +11,22 @@ class GymMembershipController {
     }
     
     async index(req, res){
-        const gymId = req.params.id;
+        const gymId = Number(req.params.id);
         const membership = await gymMembershipService.getAllUserMembership(gymId);
         return successResponse(res, membership);
     }
 
     async show(req, res){
-        const gymId = req.params.id;
-        const memberId = req.params.membershipId;
+        const gymId = Number(req.params.id);
+        const memberId = Number(req.params.membershipId);
         const membership = await gymMembershipService.getUserMembershipById(gymId, memberId);
         return successResponse(res, membership);
     }
     
     
     async create(req, res){
-        const {name, email} = req.body;
-        const gymId = req.params.id;
-        const paketId = req.params.paketId;
+        const {name, email, paketId} = req.body;
+        const gymId = Number(req.params.id);
 
         const membership = await gymMembershipService.createMembership({name, email}, gymId, paketId);
         return createdResponse(res, membership);
@@ -35,14 +34,14 @@ class GymMembershipController {
 
 
     async update(req, res){
-        const paketId = req.params.paketId;
-        const membershipId = req.params.membershipId;
+        const paketId = req.body.paketId;
+        const membershipId = Number(req.params.membershipId);
         const membership = await gymMembershipService.updateMembership(membershipId, paketId);
         return successResponse(res, membership);
     }
     
     async delete(req, res){
-        const membershipId = req.params.membershipId;
+        const membershipId = Number(req.params.membershipId);
         const membership = await gymMembershipService.removeMembership(membershipId)
 
         return successResponse(res, membership);
