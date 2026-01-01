@@ -152,7 +152,9 @@ class AuthService {
         select: {
             id: true, username: true, email: true, role: true, profileImage: true, name: true,
             gym: { select: { id: true, name: true } },          // untuk staff
-            gymsOwned: { select: { id: true, name: true } },    // untuk owner
+            gymsOwned: { where: {
+                verified: "APPROVED"
+            },select: { id: true, name: true } },    // untuk owner
             memberships: {                                      // opsional untuk member
             where: { status: "AKTIF", endDate: { gte: new Date() } },
             select: { gym: { select: { id: true, name: true } } }
