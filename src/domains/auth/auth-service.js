@@ -182,16 +182,16 @@ class AuthService {
         if (!user) {
             throw BaseError.notFound("User not found");
         }
-        if(data.email){
-            const emailExist = await prisma.user.findUnique({
+        if(data.username){
+            const usernameExist = await prisma.user.findUnique({
                 where: {
-                    email: data.email
+                    username: data.username
                 }
             });
-            if (emailExist) {
-                let validation = "Email already taken.";
+            if (usernameExist) {
+                let validation = "Username already taken.";
                 let message = {
-                        message: "Email already taken.",
+                        message: "Username already taken.",
                         path: ["email"]
                 };
                 throw new joi.ValidationError(validation, message);
@@ -216,7 +216,7 @@ class AuthService {
             data: data,
             select: {
                 id: true,
-                username: true,
+                email: true,
                 name: true
             }
         });

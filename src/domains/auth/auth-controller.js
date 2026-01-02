@@ -52,13 +52,13 @@ class AuthController {
     }
 
     async updateProfile(req, res){
-        const { email, name } = req.body;
+        const { username, name } = req.body;
         let imageProfile = null;
         if(req.files){
             imageProfile = req.files.image;
 
         }
-        const user = await AuthService.updateProfile(req.user.id, { name, email }, imageProfile);
+        const user = await AuthService.updateProfile(req.user.id, { name, username }, imageProfile);
 
         if (!user) {
             throw Error("Failed to update user profile");
