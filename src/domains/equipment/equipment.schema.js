@@ -107,8 +107,7 @@ const getUserEquipmentSchema = Joi.object({
     search: Joi.string().optional().messages({
         "string.base": "Search must be a string."
     }),
-    filter: Joi.number().min(1).required().messages({
-        "number.empty": "Id equipment is required",
+    filter: Joi.number().min(1).optional().messages({
         "number.min": "Id equipment must be number at least 1",
         "number.base": "Id equipment must be int"
     }),
